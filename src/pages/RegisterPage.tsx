@@ -24,6 +24,7 @@ import {
   searchAddressByZip,
   isMobileDevice
 } from '../lib/helpers';
+import { scrollToFirstVisibleInvalid } from '../lib/dom';
 import { SectionCard, FormInput, Modal, FileUpload, DevTestBar } from '../components/ui';
 
 type SetView = (view: ViewState) => void;
@@ -96,11 +97,7 @@ export function RegisterPage({ setView }: { setView: SetView }) {
     setShowErrors(true);
     setSubmitError('');
     if (!isFormValid) {
-      const firstInvalid = document.querySelector('.invalid-field');
-      if (firstInvalid instanceof HTMLElement) {
-        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.setTimeout(() => firstInvalid.focus(), 120);
-      }
+      scrollToFirstVisibleInvalid();
       return;
     }
     setIsSubmitting(true);

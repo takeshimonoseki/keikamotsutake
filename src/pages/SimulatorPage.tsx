@@ -11,6 +11,7 @@ import {
   loadLocalStorage,
   saveLocalStorage
 } from '../lib/helpers';
+import { scrollToFirstVisibleInvalid } from '../lib/dom';
 import { DevTestBar, OptionBlock } from '../components/ui';
 
 type SetView = (view: ViewState) => void;
@@ -91,13 +92,7 @@ export function SimulatorPage({
   const handleProceed = (nextView: ViewState) => {
     setShowErrors(true);
     if (!requiredOk) {
-      const firstInvalid = document.querySelector('.simulator-invalid-field');
-      if (firstInvalid instanceof HTMLElement) {
-        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if ('focus' in firstInvalid) {
-          window.setTimeout(() => firstInvalid.focus(), 120);
-        }
-      }
+      scrollToFirstVisibleInvalid('.simulator-invalid-field');
       return;
     }
     setView(nextView);

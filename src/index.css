@@ -32,3 +32,65 @@ img {
   max-width: 100%;
   display: block;
 }
+
+button:not(:disabled),
+a[href],
+label.cursor-pointer {
+  transition-duration: 160ms;
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity, filter;
+  transition-timing-function: ease;
+}
+
+button:not(:disabled):active,
+a[href]:active,
+label.cursor-pointer:active {
+  transform: translateY(1px);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: #52a285;
+  box-shadow: 0 0 0 3px rgba(82, 162, 133, 0.16);
+}
+
+.invalid-field:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.take-soft-card,
+.take-form-field {
+  transition-duration: 160ms;
+  transition-property: border-color, box-shadow, transform;
+  transition-timing-function: ease;
+}
+
+.take-soft-card:hover {
+  border-color: rgba(82, 162, 133, 0.2);
+  box-shadow: 0 14px 30px -24px rgba(15, 23, 42, 0.45);
+  transform: translateY(-1px);
+}
+
+.take-form-field:focus-within {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  button:not(:disabled):active,
+  a[href]:active,
+  label.cursor-pointer:active,
+  .take-soft-card:hover,
+  .take-form-field:focus-within {
+    transform: none;
+  }
+}

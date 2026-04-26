@@ -31,7 +31,7 @@ export function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+    <div className="take-soft-card bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
       <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
         {icon}
         <h2 className="text-xl font-bold text-slate-800">{title}</h2>
@@ -80,7 +80,7 @@ export function FormInput({
   errorText?: string;
 }) {
   return (
-    <div>
+    <div className="take-form-field">
       <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2">
         {label}
         {required && <Badge type="required" />}

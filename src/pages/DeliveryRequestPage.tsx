@@ -1,5 +1,5 @@
 // 見積依頼・正式依頼フォーム
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, CheckCircle2, Info, MessageCircle, Send, ShieldCheck } from 'lucide-react';
 import type { ViewState } from '../types';
@@ -16,6 +16,7 @@ import {
   searchAddressByZip,
   isMobileDevice
 } from '../lib/helpers';
+import { scrollToFirstVisibleInvalid } from '../lib/dom';
 import { FormInput, SummaryItem, Modal, Badge, DevTestBar } from '../components/ui';
 
 type SetView = (view: ViewState) => void;
@@ -66,10 +67,6 @@ export function DeliveryRequestPage({
 
   const requestLabel = mode === 'estimate' ? '見積依頼' : '正式依頼';
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const handleZipcodeChange = async (value: string) => {
     const zip = normalizeZip(value);
     setFormData((prev) => ({ ...prev, zipcode: zip }));
@@ -109,11 +106,7 @@ export function DeliveryRequestPage({
     e.preventDefault();
     setShowErrors(true);
     if (!isValid) {
-      const firstInvalid = document.querySelector('.invalid-field');
-      if (firstInvalid instanceof HTMLElement) {
-        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.setTimeout(() => firstInvalid.focus(), 120);
-      }
+      scrollToFirstVisibleInvalid();
       return;
     }
     setIsSubmitting(true);

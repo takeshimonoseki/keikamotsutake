@@ -32,6 +32,7 @@ import {
   generateCorrelationId,
   generateIdempotencyKey
 } from '../lib/helpers';
+import { scrollToFirstVisibleInvalid } from '../lib/dom';
 import { SectionCard, FormInput, Modal, Badge, DevTestBar, VehicleTabButton } from '../components/ui';
 
 type SetView = (view: ViewState) => void;
@@ -126,11 +127,7 @@ export function VehicleConsultPage({ setView }: { setView: SetView }) {
     setSubmitError('');
     if (!isValid) {
       setSubmitError('名前・電話番号・メールアドレスを入力してください。');
-      const firstInvalid = document.querySelector('.invalid-field');
-      if (firstInvalid instanceof HTMLElement) {
-        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.setTimeout(() => firstInvalid.focus(), 120);
-      }
+      scrollToFirstVisibleInvalid();
       return;
     }
     setIsSubmitting(true);

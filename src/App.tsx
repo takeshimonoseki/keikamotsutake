@@ -187,6 +187,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || window.location.hash) return;
+
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [currentView]);
+
+  useEffect(() => {
     if (typeof document === 'undefined') return;
 
     document.title = getTitleFromView(currentView);
