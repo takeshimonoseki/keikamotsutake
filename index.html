@@ -106,28 +106,28 @@
       top: 0;
       left: 0;
       width: 100%;
-      background-color: #f0f0f0; /* 薄いグレーの背景 */
+      background-color: #f8f8f8; /* 控えめな背景色 */
       color: #333; /* 濃いグレーの文字 */
-      padding: 5px 10px;
+      padding: 3px 10px; /* パディングを少し小さく */
       text-align: center;
-      font-size: 14px;
+      font-size: 13px; /* フォントサイズを小さく */
       z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* 影を控えめに */
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      line-height: 1.4;
+      gap: 10px; /* 電話番号とテキストの間に隙間 */
+      flex-wrap: wrap; /* スマホで折り返す */
     ">
-      <p style="margin: 0;">お急ぎの配送相談・お墓掃除代行のご相談はお電話でも受け付けています。</p>
+      <span style="margin: 0;">電話相談: </span>
       <a href="tel:09078834125" style="
         font-weight: bold;
         color: #007bff; /* 青色のリンク */
         text-decoration: none;
-        font-size: 16px;
-        margin-top: 2px;
-      ">電話: 090-7883-4125</a>
-      <p style="margin: 0; font-size: 12px; color: #666;">※営業・各種ご提案はフォームからお願いします。</p>
+        font-size: 14px; /* 電話番号のフォントサイズ */
+        white-space: nowrap; /* 電話番号を折り返さない */
+      ">090-7883-4125</a>
+      <span style="margin: 0; font-size: 11px; color: #666;">（営業・各種ご提案はフォームからお願いします。）</span>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
