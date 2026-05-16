@@ -334,6 +334,17 @@ export default function App() {
       <footer className="text-center py-12 text-xs text-slate-400 space-y-2 mt-20 border-t border-slate-200">
         <p>{SITE_NAME} | 山口県下関市を中心に</p>
         <p>配送相談・協力ドライバー登録・車両相談の窓口</p>
+        <div className="flex flex-col items-center justify-center space-y-1 mb-2">
+          <p className="text-sm font-bold text-slate-800">
+            お急ぎの配送相談・お墓掃除代行のご相談はお電話でも
+          </p>
+          <a href={`tel:${PHONE_TEL}`} className="block text-xl font-black text-[#52a285] hover:underline">
+            {PHONE_DISPLAY}
+          </a>
+          <p className="text-xs text-slate-500 max-w-md">
+            ※電話相談は、お荷物の配送・お墓掃除代行などをご検討中のお客様向けです。営業・各種ご提案は、内容確認のためフォームからお送りください。
+          </p>
+        </div>
         <p>LINEは補助導線、受付完了はフォーム送信が正本です</p>
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-4">
           <button type="button" onClick={() => setView('terms')} className="hover:text-slate-600 underline">

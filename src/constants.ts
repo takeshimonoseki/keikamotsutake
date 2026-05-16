@@ -12,6 +12,10 @@ export const LOGO_IMAGE_URL = logoTakeCircle;
 export const GAS_URL =
   'https://script.google.com/macros/s/AKfycbwWQsnvGNke38i4luvYZM1SHmhScl7EEPLQli0-8ozVjQHfzeBJbyArcviVq02-ZOLWgQ/exec';
 
+// 電話番号
+export const PHONE_DISPLAY = '090-7883-4125';
+export const PHONE_TEL = '09078834125';
+
 // LocalStorage キー
 export const SIMULATOR_STORAGE_KEY = 'keikamotsu_take_simulator_input_v3';
 export const DELIVERY_ESTIMATE_FORM_STORAGE_KEY = 'keikamotsu_take_delivery_estimate_form_v3';
