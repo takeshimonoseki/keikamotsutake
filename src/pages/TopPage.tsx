@@ -9,9 +9,7 @@ import {
   LINE_QR_URL,
   LINE_ACCOUNT_NAME,
   HERO_BG_URL,
-  LOGO_IMAGE_URL,
-  PHONE_DISPLAY,
-  PHONE_TEL
+  LOGO_IMAGE_URL
 } from '../constants';
 
 type SetView = (view: ViewState) => void;
@@ -51,12 +49,14 @@ export function TopPage({ setView }: { setView: SetView }) {
                 </div>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.08] drop-shadow-sm">
-                <span className="block">下関市で軽貨物配送・</span>
-                <span className="block">荷物運搬を相談するなら</span>
-                <span className="block">軽貨物TAKE。</span>
+                <span className="block">下関の軽貨物相談。</span>
+                <span className="block">協力ドライバー募集と</span>
+                <span className="block">黒ナンバー相談に対応。</span>
               </h1>
               <p className="text-base md:text-xl text-slate-700 max-w-xl leading-relaxed font-medium">
-                下関市を中心に、軽バンで運べる荷物の配送、家具・家電の運搬、小さな引越し、お墓掃除・お参り代行の相談を受け付けます。
+                {SITE_NAME}は、下関市中心の軽貨物配送相談と協力ドライバー募集の窓口です。
+                <br className="hidden md:block" />
+                黒ナンバー未取得・開業前・書類準備中の方や、軽バン車両相談にも対応しています。
               </p>
               <div className="grid sm:grid-cols-3 gap-3 max-w-2xl">
                 {[
@@ -93,18 +93,6 @@ export function TopPage({ setView }: { setView: SetView }) {
                   <UserPlus size={24} className="group-hover:scale-110 transition-transform" />
                   協力ドライバー登録フォームへ進む
                 </button>
-              </div>
-              {/* お電話でのご相談 */}
-              <div className="bg-white/78 backdrop-blur-sm p-4 rounded-2xl border border-white/80 shadow-sm text-center space-y-2 mt-4">
-                <p className="text-sm font-bold text-slate-800">
-                  お急ぎの配送相談・お墓掃除代行のご相談はお電話でも受け付けています。
-                </p>
-                <a href={`tel:${PHONE_TEL}`} className="block text-2xl font-black text-[#52a285] hover:underline">
-                  {PHONE_DISPLAY}
-                </a>
-                <p className="text-xs text-slate-500">
-                  ※電話相談は、お荷物の配送・お墓掃除代行などをご検討中のお客様向けです。営業・各種ご提案は、内容確認のためフォームからお送りください。
-                </p>
               </div>
             </div>
           </div>

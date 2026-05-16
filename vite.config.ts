@@ -16,8 +16,6 @@ export default defineConfig({
         request: fileURLToPath(new URL('./request/index.html', import.meta.url)),
         driver: fileURLToPath(new URL('./driver/index.html', import.meta.url)),
         simulator: fileURLToPath(new URL('./simulator/index.html', import.meta.url)),
-        about: fileURLToPath(new URL('./about/index.html', import.meta.url)),
-        pricing: fileURLToPath(new URL('./pricing/index.html', import.meta.url)),
       },
     },
   },

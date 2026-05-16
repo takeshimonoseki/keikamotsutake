@@ -10,9 +10,7 @@ export type ViewState =
   | 'privacy'
   | 'notice'
   | 'driver-notice'
-  | 'pre-open'
-  | 'about'
-  | 'pricing';
+  | 'pre-open';
 
 // 車両相談の種別
 export type VehicleConsultKind = 'purchase' | 'repair' | 'inspection';
