@@ -1,5 +1,5 @@
 // ルーティング・レイアウト（ヘッダー・メイン・フッター）
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { ViewState } from './types';
 import type { SimulatorInput, DeliveryFormData } from './types';
 import {
@@ -130,6 +130,154 @@ function getTitleFromView(view: ViewState) {
 function getCanonicalHref(view: ViewState) {
   const pathOnly = getUrlFromView(view).split('?')[0];
   return `https://takeshimonoseki.github.io${pathOnly}`;
+}
+
+const LINE_SHARE_URL = 'https://lin.ee/9wP0eOt';
+const SHARE_TEXT = 'このページを共有します。';
+
+const headerActionButtonClass =
+  'inline-flex items-center justify-center shrink-0 rounded-full h-9 min-w-[4.5rem] px-3 text-[11px] sm:text-xs font-bold leading-none shadow-sm -webkit-tap-highlight-color-transparent';
+
+function HeaderShareMenu() {
+  const [open, setOpen] = useState(false);
+  const [copyLabel, setCopyLabel] = useState('URLコピー');
+  const rootRef = useRef<HTMLDivElement>(null);
+  const copyResetTimerRef = useRef<number | null>(null);
+
+  const getShareUrl = () => {
+    if (typeof window === 'undefined') return '';
+    return window.location.href.split('#')[0];
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClick = (event: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimerRef.current !== null) {
+        window.clearTimeout(copyResetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const showCopiedLabel = () => {
+    setCopyLabel('コピー済み');
+    if (copyResetTimerRef.current !== null) {
+      window.clearTimeout(copyResetTimerRef.current);
+    }
+    copyResetTimerRef.current = window.setTimeout(() => {
+      setCopyLabel('URLコピー');
+      copyResetTimerRef.current = null;
+    }, 1400);
+  };
+
+  const copyUrl = async () => {
+    const url = getShareUrl();
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+        showCopiedLabel();
+        return;
+      }
+
+      window.prompt('URLをコピーしてください', url);
+    } catch {
+      window.prompt('URLをコピーしてください', url);
+    }
+  };
+
+  const sharePage = async () => {
+    const shareData = {
+      title: typeof document !== 'undefined' ? document.title || '軽貨物TAKE' : '軽貨物TAKE',
+      text: SHARE_TEXT,
+      url: getShareUrl(),
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setOpen(false);
+        return;
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+      }
+    }
+
+    await copyUrl();
+    setOpen(false);
+  };
+
+  return (
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen((prev) => !prev);
+        }}
+        className={`${headerActionButtonClass} border-2 border-white/95 bg-gradient-to-br from-[#06c755] to-[#16a34a] text-white font-black shadow-[0_8px_22px_rgba(22,163,74,0.28)]`}
+      >
+        共有
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-[60] mt-1.5 grid min-w-[9.5rem] gap-2 rounded-2xl border border-[#bbf7d0] bg-white/98 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
+        >
+          <a
+            href={LINE_SHARE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            role="menuitem"
+            className="block rounded-full bg-[#06c755] px-3.5 py-2.5 text-center text-[13px] font-extrabold text-white no-underline"
+            onClick={() => setOpen(false)}
+          >
+            公式LINE
+          </a>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void sharePage()}
+            className="block w-full rounded-full border border-[#fed7aa] bg-[#fff7ed] px-3.5 py-2.5 text-center text-[13px] font-extrabold text-[#9a3412]"
+          >
+            共有する
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void copyUrl()}
+            className="block w-full rounded-full border border-[#fed7aa] bg-[#fff7ed] px-3.5 py-2.5 text-center text-[13px] font-extrabold text-[#9a3412]"
+          >
+            {copyLabel}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function App() {
@@ -263,34 +411,40 @@ export default function App() {
               </button>
             </div>
 
-            <div className="hidden xl:flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-              <img
-                src={LINE_QR_URL}
-                alt={`${LINE_ACCOUNT_NAME} QRコード`}
-                className="w-14 h-14 rounded-lg border border-slate-200 bg-white"
-              />
-              <div className="text-left">
-                <p className="text-[11px] font-black text-slate-700">LINEで補助相談</p>
-                <p className="text-[10px] text-slate-400 mb-1">正式受付はフォーム送信</p>
-                <a
-                  href={LINE_FRIEND_ADD_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] font-bold text-[#06C755] hover:underline"
-                >
-                  友だち追加はこちら
-                </a>
+            <div className="hidden xl:flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                <img
+                  src={LINE_QR_URL}
+                  alt={`${LINE_ACCOUNT_NAME} QRコード`}
+                  className="w-14 h-14 rounded-lg border border-slate-200 bg-white"
+                />
+                <div className="text-left">
+                  <p className="text-[11px] font-black text-slate-700">LINEで補助相談</p>
+                  <p className="text-[10px] text-slate-400 mb-1">正式受付はフォーム送信</p>
+                  <a
+                    href={LINE_FRIEND_ADD_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-bold text-[#06C755] hover:underline"
+                  >
+                    友だち追加はこちら
+                  </a>
+                </div>
               </div>
+              <HeaderShareMenu />
             </div>
 
-            <a
-              href={LINE_FRIEND_ADD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="xl:hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-[#06C755] shadow-sm"
-            >
-              LINE追加
-            </a>
+            <div className="flex items-center gap-2 shrink-0 xl:hidden">
+              <a
+                href={LINE_FRIEND_ADD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${headerActionButtonClass} border border-slate-200 bg-white text-[#06C755]`}
+              >
+                LINE追加
+              </a>
+              <HeaderShareMenu />
+            </div>
           </div>
         </div>
       </header>
