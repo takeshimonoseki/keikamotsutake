@@ -48,6 +48,9 @@ export function SimulatorPage({
   }, [setSimulatorInput]);
 
   const fare = useMemo(() => calculateFare(simulatorInput), [simulatorInput]);
+  const distanceKm = Number(simulatorInput.distance);
+  const canShowFareEstimate =
+    simulatorInput.distance.trim() !== '' && Number.isFinite(distanceKm) && distanceKm > 0;
   const update = (partial: Partial<SimulatorInput>) => {
     setSimulatorInput((prev) => ({ ...prev, ...partial }));
   };
@@ -143,6 +146,27 @@ export function SimulatorPage({
       >
         <ArrowLeft size={16} /> トップに戻る
       </button>
+
+      <div
+        className="sticky top-20 z-40 rounded-2xl border border-emerald-200 bg-white/95 backdrop-blur-sm px-4 py-3 shadow-md"
+        aria-live="polite"
+      >
+        <p className="text-[11px] font-bold text-slate-500">概算料金</p>
+        {canShowFareEstimate ? (
+          <>
+            <p className="text-2xl sm:text-3xl font-black text-[#52a285] leading-tight">
+              {fare.toLocaleString()}円
+            </p>
+            <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+              正式料金は荷物量・作業内容・現地状況で変わります
+            </p>
+          </>
+        ) : (
+          <p className="text-sm font-bold text-slate-600 mt-0.5">
+            条件を入力すると概算料金が表示されます
+          </p>
+        )}
+      </div>
 
       <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-slate-100">
         <div className="flex items-center gap-3 mb-6">

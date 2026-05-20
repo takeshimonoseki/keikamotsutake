@@ -1,7 +1,7 @@
 // path: src/pages/TopPage.tsx
 // トップページ：ヒーロー・配送相談・ドライバー登録・開業前導線・車両相談
 import { motion } from 'motion/react';
-import { CheckCircle2, MapPin, Truck, UserPlus, HelpCircle } from 'lucide-react';
+import { Calculator, CheckCircle2, MapPin, Truck, UserPlus, HelpCircle } from 'lucide-react';
 import type { ViewState } from '../types';
 import {
   SITE_NAME,
@@ -76,7 +76,21 @@ export function TopPage({ setView }: { setView: SetView }) {
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-start gap-4 pt-2">
+              <div className="space-y-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setView('simulator')}
+                  className="w-full sm:w-auto bg-amber-500 text-white px-10 py-5 rounded-2xl font-black text-lg md:text-xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 group justify-center text-center sm:text-left"
+                >
+                  <span className="inline-flex items-center justify-center gap-3">
+                    <Calculator size={24} className="group-hover:scale-110 transition-transform shrink-0" />
+                    料金をすぐ確認
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-amber-50/95 sm:ml-1">
+                    距離・荷物量を入力すると、その場で概算料金が見られます
+                  </span>
+                </button>
+                <div className="flex flex-col sm:flex-row items-center justify-start gap-4">
                 <button
                   type="button"
                   onClick={() => setView('simulator')}
@@ -93,6 +107,7 @@ export function TopPage({ setView }: { setView: SetView }) {
                   <UserPlus size={24} className="group-hover:scale-110 transition-transform" />
                   協力ドライバー登録フォームへ進む
                 </button>
+                </div>
               </div>
             </div>
           </div>
