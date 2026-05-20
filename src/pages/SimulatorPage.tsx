@@ -55,6 +55,14 @@ export function SimulatorPage({
     setSimulatorInput((prev) => ({ ...prev, ...partial }));
   };
 
+  const adjustDistance = (delta: number) => {
+    const raw = simulatorInput.distance.trim();
+    const current = raw === '' ? 0 : Number(raw);
+    const base = Number.isFinite(current) ? current : 0;
+    const next = Math.max(0, base + delta);
+    update({ distance: String(next) });
+  };
+
   const fillTestData = () => {
     const base = defaultSimulatorInput();
     setSimulatorInput({
@@ -274,16 +282,42 @@ export function SimulatorPage({
             <div className="relative">
               <input
                 type="number"
+                min={0}
+                step={1}
+                inputMode="numeric"
                 value={simulatorInput.distance}
                 onChange={(e) => update({ distance: e.target.value })}
                 placeholder="例：15"
-                className={`w-full p-3 rounded-xl border outline-none bg-white font-mono text-lg ${
+                className={`w-full p-3 pr-12 rounded-xl border outline-none bg-white font-mono text-lg ${
                   invalidDistance
                     ? 'border-red-500 bg-red-50/50 simulator-invalid-field'
                     : 'border-blue-200 focus:border-blue-500'
                 }`}
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 font-bold">km</div>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 font-bold pointer-events-none select-none">
+                km
+              </div>
+            </div>
+            <div className="mt-3">
+              <p className="text-[10px] font-bold text-blue-700 mb-2">距離を調整</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => adjustDistance(-1)}
+                  aria-label="距離を1km減らす"
+                  className="flex-1 min-h-[44px] text-sm font-bold bg-white text-blue-600 border border-blue-200 px-4 py-2.5 rounded-xl hover:bg-blue-600 hover:text-white transition-all active:scale-[0.98]"
+                >
+                  −1km
+                </button>
+                <button
+                  type="button"
+                  onClick={() => adjustDistance(1)}
+                  aria-label="距離を1km増やす"
+                  className="flex-1 min-h-[44px] text-sm font-bold bg-white text-blue-600 border border-blue-200 px-4 py-2.5 rounded-xl hover:bg-blue-600 hover:text-white transition-all active:scale-[0.98]"
+                >
+                  ＋1km
+                </button>
+              </div>
             </div>
           </div>
 
