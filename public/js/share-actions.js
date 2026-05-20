@@ -16,12 +16,14 @@
 
   async function copyUrl(button) {
     const url = getShareUrl();
+
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(url);
         setTemporaryLabel(button, "コピー済み");
         return;
       }
+
       window.prompt("URLをコピーしてください", url);
     } catch (error) {
       window.prompt("URLをコピーしてください", url);
@@ -30,7 +32,7 @@
 
   async function sharePage(copyButton) {
     const shareData = {
-      title: document.title || "ホームページ",
+      title: document.title || "軽貨物TAKE",
       text: SHARE_TEXT,
       url: getShareUrl(),
     };
@@ -47,6 +49,11 @@
     await copyUrl(copyButton);
   }
 
+  function closeMenu(wrapper, toggle) {
+    wrapper.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+  }
+
   function createShareActions() {
     if (document.getElementById("share-actions")) return;
 
@@ -54,29 +61,60 @@
     style.textContent = `
       #share-actions {
         position: fixed;
-        right: 16px;
-        bottom: 16px;
+        top: calc(46px + env(safe-area-inset-top, 0px));
+        right: 18px;
         z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        max-width: calc(100vw - 32px);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
-      #share-actions a,
-      #share-actions button {
-        appearance: none;
+      #share-actions .share-toggle {
+        min-width: 70px;
+        height: 40px;
+        border: 2px solid rgba(255,255,255,.95);
+        border-radius: 999px;
+        background: linear-gradient(135deg, #06c755, #16a34a);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 900;
+        box-shadow: 0 8px 22px rgba(22, 163, 74, .30);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #share-actions .share-menu {
+        position: absolute;
+        right: 0;
+        top: 48px;
+        display: none;
+        min-width: 168px;
+        padding: 8px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .98);
+        border: 1px solid #bbf7d0;
+        box-shadow: 0 12px 32px rgba(0,0,0,.18);
+      }
+
+      #share-actions.is-open .share-menu {
+        display: grid;
+        gap: 8px;
+      }
+
+      #share-actions .share-menu a,
+      #share-actions .share-menu button {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
         border: none;
         border-radius: 999px;
-        padding: 11px 16px;
+        padding: 12px 14px;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
         line-height: 1;
+        text-align: center;
         text-decoration: none;
-        box-shadow: 0 8px 22px rgba(0,0,0,.16);
         cursor: pointer;
         white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
       }
 
       #share-actions .line {
@@ -93,22 +131,25 @@
 
       @media (max-width: 640px) {
         #share-actions {
-          left: 10px;
+          top: calc(44px + env(safe-area-inset-top, 0px));
           right: 10px;
-          bottom: 10px;
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          gap: 6px;
         }
 
-        #share-actions a,
-        #share-actions button {
-          padding: 10px 6px;
-          font-size: 12px;
+        #share-actions .share-toggle {
+          min-width: 64px;
+          height: 38px;
+          font-size: 13px;
         }
 
-        body {
-          padding-bottom: 68px;
+        #share-actions .share-menu {
+          top: 46px;
+          min-width: 154px;
+        }
+
+        #share-actions .share-menu a,
+        #share-actions .share-menu button {
+          padding: 11px 12px;
+          font-size: 13px;
         }
       }
     `;
@@ -117,6 +158,15 @@
     const wrapper = document.createElement("div");
     wrapper.id = "share-actions";
     wrapper.setAttribute("aria-label", "ページ共有と公式LINE");
+
+    const toggle = document.createElement("button");
+    toggle.className = "share-toggle";
+    toggle.type = "button";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.textContent = "共有";
+
+    const menu = document.createElement("div");
+    menu.className = "share-menu";
 
     const line = document.createElement("a");
     line.className = "line";
@@ -128,17 +178,42 @@
     const share = document.createElement("button");
     share.className = "share";
     share.type = "button";
-    share.textContent = "共有";
+    share.textContent = "共有する";
 
     const copy = document.createElement("button");
     copy.className = "copy";
     copy.type = "button";
     copy.textContent = "URLコピー";
 
-    share.addEventListener("click", () => sharePage(copy));
-    copy.addEventListener("click", () => copyUrl(copy));
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = wrapper.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
 
-    wrapper.append(line, share, copy);
+    share.addEventListener("click", async () => {
+      await sharePage(copy);
+      closeMenu(wrapper, toggle);
+    });
+
+    copy.addEventListener("click", async () => {
+      await copyUrl(copy);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!wrapper.contains(event.target)) {
+        closeMenu(wrapper, toggle);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeMenu(wrapper, toggle);
+      }
+    });
+
+    menu.append(line, share, copy);
+    wrapper.append(toggle, menu);
     document.body.appendChild(wrapper);
   }
 
