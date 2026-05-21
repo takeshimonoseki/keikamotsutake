@@ -98,33 +98,55 @@
         ]
       }
     </script>
+    <style>
+      .top-phone-text-short {
+        display: none;
+      }
+      @media (max-width: 639px) {
+        .top-phone-text-long {
+          display: none;
+        }
+        .top-phone-text-short {
+          display: inline;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- 電話番号案内バー -->
-    <div style="
+    <div
+      class="top-phone-bar"
+      style="
       width: 100%;
-      background-color: #f8fafc; /* 薄い背景色 */
-      color: #333; /* 濃いグレーの文字 */
-      padding: 5px 10px; /* パディング */
+      background-color: #f8fafc;
+      color: #333;
+      padding: 5px 10px;
       text-align: center;
-      font-size: 13px; /* フォントサイズ */
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 影をさらに控えめに */
+      font-size: 13px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       display: flex;
-      flex-wrap: wrap; /* スマホで折り返す */
+      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 5px; /* 要素間の隙間 */
+      gap: 5px;
       line-height: 1.4;
-    ">
-      <span style="margin: 0;">お急ぎの配送相談・お墓掃除代行のご相談はお電話でも受け付けています。</span>
-      <a href="tel:09078834125" style="
+    "
+    >
+      <span class="top-phone-text-long" style="margin: 0"
+        >ご依頼・緊急相談専用。営業・広告・SEO・MEO・掲載・制作などのご提案電話は対応しておりません。</span
+      >
+      <span class="top-phone-text-short" style="margin: 0">ご依頼専用／営業電話不可</span>
+      <a
+        href="tel:09078834125"
+        style="
         font-weight: bold;
-        color: #007bff; /* 青色のリンク */
+        color: #007bff;
         text-decoration: none;
-        font-size: 14px; /* 電話番号のフォントサイズ */
-        white-space: nowrap; /* 電話番号を折り返さない */
-      ">090-7883-4125</a>
-      <span style="margin: 0; font-size: 11px; color: #666;">（営業・各種ご提案はフォームからお願いします。）</span>
+        font-size: 14px;
+        white-space: nowrap;
+      "
+        >090-7883-4125</a
+      >
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
