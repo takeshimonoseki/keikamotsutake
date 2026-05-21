@@ -80,14 +80,17 @@ export function TopPage({ setView }: { setView: SetView }) {
                 <button
                   type="button"
                   onClick={() => setView('simulator')}
-                  className="w-full sm:w-auto bg-amber-500 text-white px-10 py-5 rounded-2xl font-black text-lg md:text-xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 group justify-center text-center sm:text-left"
+                  className="w-full sm:w-auto bg-amber-500 text-white px-5 py-4 sm:px-10 sm:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 flex flex-col items-center sm:flex-row sm:items-center gap-1.5 sm:gap-3 group justify-center text-center sm:text-left leading-snug"
                 >
-                  <span className="inline-flex items-center justify-center gap-3">
-                    <Calculator size={24} className="group-hover:scale-110 transition-transform shrink-0" />
-                    概算料金をすぐ確認
+                  <span className="inline-flex items-center justify-center gap-2 sm:gap-3">
+                    <Calculator
+                      size={22}
+                      className="group-hover:scale-110 transition-transform shrink-0 sm:h-6 sm:w-6"
+                    />
+                    概算料金を確認する
                   </span>
-                  <span className="text-xs sm:text-sm font-bold text-amber-50/95 sm:ml-1">
-                    距離・荷物量を入力すると、その場で概算料金が見られます
+                  <span className="text-[11px] sm:text-sm font-bold text-amber-50/95 leading-tight sm:ml-1">
+                    距離・荷物量から目安を見る
                   </span>
                 </button>
                 <div className="flex flex-col sm:flex-row items-center justify-start gap-4">
