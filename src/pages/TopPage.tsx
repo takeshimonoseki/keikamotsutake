@@ -45,18 +45,18 @@ export function TopPage({ setView }: { setView: SetView }) {
                 </div>
                 <div className="text-left">
                   <p className="text-[11px] font-black tracking-[0.24em] text-slate-500">SHIMONOSEKI TRANSPORT</p>
-                  <p className="text-sm font-bold text-slate-700">軽貨物配送相談・協力ドライバー募集・黒ナンバー相談の窓口</p>
+                  <p className="text-sm font-bold text-slate-700">荷物運搬・軽貨物配送・小さな引越しの相談窓口</p>
                 </div>
               </div>
-              <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.08] drop-shadow-sm">
-                <span className="block">下関の軽貨物相談。</span>
-                <span className="block">協力ドライバー募集と</span>
-                <span className="block">黒ナンバー相談に対応。</span>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.08] drop-shadow-sm">
+                <span className="block">下関市の荷物運搬・</span>
+                <span className="block">軽貨物配送なら</span>
+                <span className="block">{SITE_NAME}</span>
               </h1>
               <p className="text-base md:text-xl text-slate-700 max-w-xl leading-relaxed font-medium">
-                {SITE_NAME}は、下関市中心の軽貨物配送相談と協力ドライバー募集の窓口です。
+                軽バンで運べる荷物、家具・家電、小さな引越し、急ぎの配送相談に対応します。
                 <br className="hidden md:block" />
-                黒ナンバー未取得・開業前・書類準備中の方や、軽バン車両相談にも対応しています。
+                料金目安を確認して、そのまま見積もり依頼できます。
               </p>
               <div className="grid sm:grid-cols-3 gap-3 max-w-2xl">
                 {[
@@ -84,7 +84,7 @@ export function TopPage({ setView }: { setView: SetView }) {
                 >
                   <span className="inline-flex items-center justify-center gap-3">
                     <Calculator size={24} className="group-hover:scale-110 transition-transform shrink-0" />
-                    料金をすぐ確認
+                    概算料金をすぐ確認
                   </span>
                   <span className="text-xs sm:text-sm font-bold text-amber-50/95 sm:ml-1">
                     距離・荷物量を入力すると、その場で概算料金が見られます
