@@ -1,6 +1,6 @@
 // サイト・LINE・画像など公開してよい固定値
 import heroKanmonTake from './assets/hero-kanmon-take.png';
-import logoTakeCircle from './assets/logo-take-circle.png';
+import logoTakeCircle from './assets/logo-take-circle-v2.png';
 import lineQrTake from './assets/line-qr-take.png';
 
 export const SITE_NAME = '軽貨物TAKE';
