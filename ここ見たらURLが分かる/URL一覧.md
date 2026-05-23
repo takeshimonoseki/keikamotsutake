@@ -5,22 +5,22 @@
 ## 本番URL（GitHub Pages）
 
 ### 総合トップ
-https://takeshimonoseki.github.io/
+https://takeshimonoseki.github.io/keikamotsutake/
 
 ### お客様専用トップ
-https://takeshimonoseki.github.io/delivery/
+https://takeshimonoseki.github.io/keikamotsutake/delivery/
 
 ### ドライバー専用トップ
-https://takeshimonoseki.github.io/driver-entry/
+https://takeshimonoseki.github.io/keikamotsutake/driver-entry/
 
 ### 配送相談・見積依頼フォーム
-https://takeshimonoseki.github.io/request/
+https://takeshimonoseki.github.io/keikamotsutake/request/
 
 ### 協力ドライバー登録ページ
-https://takeshimonoseki.github.io/driver/
+https://takeshimonoseki.github.io/keikamotsutake/driver/
 
 ### 運賃シミュレーター
-https://takeshimonoseki.github.io/simulator/
+https://takeshimonoseki.github.io/keikamotsutake/simulator/
 
 ---
 

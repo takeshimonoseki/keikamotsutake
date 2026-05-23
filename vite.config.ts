@@ -6,7 +6,7 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   appType: 'mpa',
-  base: '/',
+  base: '/keikamotsutake/',
   build: {
     outDir: 'dist',
     sourcemap: false,
