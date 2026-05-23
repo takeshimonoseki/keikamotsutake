@@ -496,6 +496,9 @@ export default function App() {
           <button type="button" onClick={() => setView('privacy')} className="hover:text-slate-600 underline">
             プライバシーポリシー
           </button>
+          <a href="/keikamotsutake/sct/" className="hover:text-slate-600 underline">
+            特定商取引法に基づく表記
+          </a>
           <button type="button" onClick={() => setView('notice')} className="hover:text-slate-600 underline">
             ご利用上の注意
           </button>
