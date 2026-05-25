@@ -127,9 +127,16 @@ function getTitleFromView(view: ViewState) {
   }
 }
 
+const SITE_ORIGIN = 'https://takeshimonoseki.github.io';
+
+function getPublicBasePath() {
+  const base = import.meta.env.BASE_URL || '/';
+  return base.endsWith('/') ? base.slice(0, -1) : base;
+}
+
 function getCanonicalHref(view: ViewState) {
-  const pathOnly = getUrlFromView(view).split('?')[0];
-  return `https://takeshimonoseki.github.io${pathOnly}`;
+  const urlPath = getUrlFromView(view);
+  return `${SITE_ORIGIN}${getPublicBasePath()}${urlPath}`;
 }
 
 const LINE_SHARE_URL = 'https://lin.ee/9wP0eOt';
