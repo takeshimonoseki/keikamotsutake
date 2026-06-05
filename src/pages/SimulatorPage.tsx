@@ -9,7 +9,8 @@ import {
   defaultSimulatorInput,
   calculateFare,
   loadLocalStorage,
-  saveLocalStorage
+  saveLocalStorage,
+  fetchDistanceEstimate
 } from '../lib/helpers';
 import { scrollToFirstVisibleInvalid } from '../lib/dom';
 import { DevTestBar, OptionBlock } from '../components/ui';
@@ -26,6 +27,9 @@ export function SimulatorPage({
   setSimulatorInput: React.Dispatch<React.SetStateAction<SimulatorInput>>;
 }) {
   const [isLocating, setIsLocating] = useState(false);
+  const [isDistanceFetching, setIsDistanceFetching] = useState(false);
+  const [distanceMessage, setDistanceMessage] = useState('');
+  const [distanceError, setDistanceError] = useState('');
   const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
@@ -61,6 +65,40 @@ export function SimulatorPage({
     const base = Number.isFinite(current) ? current : 0;
     const next = Math.max(0, base + delta);
     update({ distance: String(next) });
+  };
+
+  const fetchDistanceFromAddress = async () => {
+    if (!simulatorInput.origin.trim() || !simulatorInput.destination.trim()) {
+      alert('集荷先と納品先を入力してください。');
+      return;
+    }
+
+    setIsDistanceFetching(true);
+    setDistanceMessage('');
+    setDistanceError('');
+
+    try {
+      const result = await fetchDistanceEstimate(
+        simulatorInput.origin,
+        simulatorInput.destination
+      );
+
+      update({ distance: String(result.billing_distance_km) });
+
+      setDistanceMessage(
+        `自動取得: ${result.distance_km}km / 入力距離 ${result.billing_distance_km}km${
+          result.duration_text ? ` / 約${result.duration_text}` : ''
+        }`
+      );
+    } catch (error) {
+      setDistanceError(
+        error instanceof Error
+          ? error.message
+          : '距離の自動取得に失敗しました。距離を手入力してください。'
+      );
+    } finally {
+      setIsDistanceFetching(false);
+    }
   };
 
   const fillTestData = () => {
@@ -239,28 +277,48 @@ export function SimulatorPage({
           </div>
 
           <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-            <div className="flex items-center justify-between mb-3">
-              <label className="flex items-center gap-2 text-sm font-bold text-blue-900">
+            <div className="mb-3">
+              <label className="flex items-center gap-2 text-sm font-bold text-blue-900 mb-2">
                 距離（km）
                 <span className="bg-red-50 text-red-500 text-[10px] px-2 py-0.5 rounded font-bold border border-red-100">必須</span>
               </label>
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-                  simulatorInput.origin
-                )}&destination=${encodeURIComponent(simulatorInput.destination)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-1 px-4 py-2 rounded-full shadow-sm transition-all"
-                onClick={(e) => {
-                  if (!simulatorInput.origin || !simulatorInput.destination) {
-                    e.preventDefault();
-                    alert('集荷先と納品先を入力してください。');
-                  }
-                }}
+              <p className="text-xs font-bold text-blue-700 mb-3">
+                集荷先と納品先を入力したら、まず下のボタンで距離を計算してください。
+              </p>
+              <button
+                type="button"
+                onClick={fetchDistanceFromAddress}
+                disabled={isDistanceFetching}
+                className="w-full min-h-[52px] text-base font-black text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 px-5 py-3 rounded-2xl shadow-sm transition-all active:scale-[0.98]"
               >
-                <MapPin size={14} /> Googleマップで距離を調べる ↗
-              </a>
+                <Zap size={18} />
+                {isDistanceFetching ? '距離を計算中...' : '住所から距離を計算する'}
+              </button>
+              <div className="mt-2 text-right">
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                    simulatorInput.origin
+                  )}&destination=${encodeURIComponent(simulatorInput.destination)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-bold text-blue-500 hover:text-blue-700 underline"
+                  onClick={(e) => {
+                    if (!simulatorInput.origin || !simulatorInput.destination) {
+                      e.preventDefault();
+                      alert('集荷先と納品先を入力してください。');
+                    }
+                  }}
+                >
+                  Googleマップで確認する ↗
+                </a>
+              </div>
             </div>
+            {distanceMessage && (
+              <p className="text-xs font-bold text-emerald-700 mb-3">{distanceMessage}</p>
+            )}
+            {distanceError && (
+              <p className="text-xs font-bold text-red-600 mb-3">{distanceError}</p>
+            )}
             <div className="flex flex-wrap gap-2 mb-3">
               {COMMON_ROUTES.map((route) => (
                 <button

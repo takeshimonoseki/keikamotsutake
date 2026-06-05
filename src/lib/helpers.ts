@@ -175,6 +175,55 @@ function buildVerifyUrl(receiptNo: string): string {
   return `${GAS_URL}${sep}type=verify&receiptNo=${encodeURIComponent(receiptNo)}`;
 }
 
+export type DistanceEstimateResult = {
+  ok?: boolean;
+  result?: string;
+  cached?: boolean;
+  origin?: string;
+  destination?: string;
+  distance_meters?: number;
+  distance_km?: number;
+  billing_distance_km?: number;
+  duration_text?: string;
+  provider?: string;
+  message?: string;
+  error_code?: string;
+};
+
+export async function fetchDistanceEstimate(origin: string, destination: string): Promise<DistanceEstimateResult> {
+  const cleanOrigin = origin.trim();
+  const cleanDestination = destination.trim();
+
+  if (!cleanOrigin || !cleanDestination) {
+    throw new Error('集荷先と納品先を入力してください。');
+  }
+
+  const url = new URL(GAS_URL);
+  url.searchParams.set('type', 'distance');
+  url.searchParams.set('origin', cleanOrigin);
+  url.searchParams.set('destination', cleanDestination);
+  url.searchParams.set('t', String(Date.now()));
+
+  const res = await fetch(url.toString(), {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit'
+  });
+
+  const body = await res.text();
+  const data = JSON.parse(body) as DistanceEstimateResult;
+
+  if (data.ok !== true && data.result !== 'OK') {
+    throw new Error(data.message || data.error_code || '距離の自動取得に失敗しました。');
+  }
+
+  if (typeof data.billing_distance_km !== 'number') {
+    throw new Error('距離の数値を取得できませんでした。距離を手入力してください。');
+  }
+
+  return data;
+}
+
 /** 受付番号がシートに現れるまで GET で確認（GAS の type=verify） */
 async function pollVerifyReceipt(receiptNo: string): Promise<void> {
   for (let i = 0; i < 20; i++) {

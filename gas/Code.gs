@@ -954,9 +954,327 @@ function doPost(e) {
   }
 }
 
+
+function getGoogleMapsApiKey_() {
+  return PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY') || '';
+}
+
+function getMapsDistanceDailyLimit_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_DAILY_LIMIT') || '100';
+  var n = Number(raw);
+  if (!isFinite(n) || n < 1) return 100;
+  return Math.floor(n);
+}
+
+function getMapsDistanceCacheSeconds_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_DISTANCE_CACHE_SECONDS') || '21600';
+  var n = Number(raw);
+  if (!isFinite(n) || n < 60) return 21600;
+  return Math.min(Math.floor(n), 21600);
+}
+
+function getTodayJst_() {
+  return Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
+}
+
+function sha256Hex_(value) {
+  var bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    String(value || ''),
+    Utilities.Charset.UTF_8
+  );
+  var out = [];
+  for (var i = 0; i < bytes.length; i++) {
+    var v = (bytes[i] + 256) % 256;
+    out.push(('0' + v.toString(16)).slice(-2));
+  }
+  return out.join('');
+}
+
+function buildMapsDistanceCacheKey_(origin, destination) {
+  return 'maps_distance_' + sha256Hex_(origin + '||' + destination).slice(0, 64);
+}
+
+function incrementMapsDistanceUsage_() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var key = 'GOOGLE_MAPS_DISTANCE_USAGE_' + getTodayJst_();
+    var current = Number(props.getProperty(key) || '0') || 0;
+    var limit = getMapsDistanceDailyLimit_();
+
+    if (current >= limit) {
+      return {
+        allowed: false,
+        current: current,
+        limit: limit
+      };
+    }
+
+    current += 1;
+    props.setProperty(key, String(current));
+
+    return {
+      allowed: true,
+      current: current,
+      limit: limit
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function formatRouteDuration_(durationText) {
+  var m = String(durationText || '').match(/^([0-9]+)s$/);
+  if (!m) return '';
+
+  var seconds = Number(m[1]) || 0;
+  var minutes = Math.max(1, Math.round(seconds / 60));
+
+  if (minutes < 60) return minutes + '分';
+
+  var h = Math.floor(minutes / 60);
+  var rest = minutes % 60;
+
+  return rest ? h + '時間' + rest + '分' : h + '時間';
+}
+
+function logMapsDistanceIssue_(level, action, message, detail) {
+  try {
+    var ss = getSpreadsheet_();
+    appendLog_(ss, level, action, '', message, detail || {});
+  } catch (e) {
+    Logger.log('logMapsDistanceIssue_ skipped: ' + e);
+  }
+}
+
+function notifyMapsDistanceIssue_(code, message, detail) {
+  try {
+    var cache = CacheService.getScriptCache();
+    var cacheKey = 'maps_distance_alert_' + code;
+
+    if (cache.get(cacheKey)) return;
+
+    cache.put(cacheKey, '1', 21600);
+
+    var text = [
+      '【距離自動取得エラー】',
+      'コード: ' + code,
+      '内容: ' + message,
+      '発生: ' + new Date().toISOString()
+    ];
+
+    if (detail && detail.origin) text.push('集荷先: ' + detail.origin);
+    if (detail && detail.destination) text.push('納品先: ' + detail.destination);
+    if (detail && detail.usage) {
+      text.push('使用量: ' + detail.usage.current + '/' + detail.usage.limit);
+    }
+
+    sendAdminLine_(text.join('\n'), '');
+  } catch (e) {
+    Logger.log('notifyMapsDistanceIssue_ skipped: ' + e);
+  }
+}
+
+function buildDistanceErrorResponse_(errorCode, message, extra) {
+  var out = {
+    ok: false,
+    result: 'NG',
+    error_code: errorCode,
+    message: message
+  };
+
+  if (extra) {
+    for (var key in extra) {
+      if (extra.hasOwnProperty(key)) {
+        out[key] = extra[key];
+      }
+    }
+  }
+
+  return buildJsonResponse_(out);
+}
+
+function fetchGoogleRouteDistance_(origin, destination) {
+  var apiKey = getGoogleMapsApiKey_();
+
+  if (!apiKey) {
+    throw new Error('GOOGLE_MAPS_API_KEY is not set');
+  }
+
+  var endpoint = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+  var payload = {
+    origin: {
+      address: origin
+    },
+    destination: {
+      address: destination
+    },
+    travelMode: 'DRIVE',
+    routingPreference: 'TRAFFIC_UNAWARE',
+    languageCode: 'ja-JP',
+    units: 'METRIC'
+  };
+
+  var response = UrlFetchApp.fetch(endpoint, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration'
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+
+  var httpCode = response.getResponseCode();
+  var bodyText = response.getContentText();
+
+  if (httpCode < 200 || httpCode >= 300) {
+    throw new Error('Google Routes API failed: HTTP ' + httpCode + ' ' + bodyText.slice(0, 500));
+  }
+
+  var data = JSON.parse(bodyText || '{}');
+  var route = data.routes && data.routes[0];
+
+  if (!route || route.distanceMeters == null) {
+    throw new Error('Google Routes API returned no route');
+  }
+
+  var distanceMeters = Number(route.distanceMeters) || 0;
+  var distanceKm = Math.round((distanceMeters / 1000) * 10) / 10;
+  var billingDistanceKm = Math.max(1, Math.ceil(distanceMeters / 1000));
+
+  return {
+    distance_meters: distanceMeters,
+    distance_km: distanceKm,
+    billing_distance_km: billingDistanceKm,
+    duration_text: formatRouteDuration_(route.duration),
+    provider: 'google_routes'
+  };
+}
+
+function handleDistanceGet_(params) {
+  var origin = safeStr_(params.origin, 500);
+  var destination = safeStr_(params.destination, 500);
+
+  if (!origin || !destination) {
+    return buildDistanceErrorResponse_(
+      'VALIDATION_ERROR',
+      '集荷先と納品先を入力してください。',
+      {}
+    );
+  }
+
+  var cacheKey = buildMapsDistanceCacheKey_(origin, destination);
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(cacheKey);
+
+  if (cached) {
+    try {
+      var cachedData = JSON.parse(cached);
+      cachedData.ok = true;
+      cachedData.result = 'OK';
+      cachedData.cached = true;
+      cachedData.origin = origin;
+      cachedData.destination = destination;
+      cachedData.message = '距離を取得しました';
+      return buildJsonResponse_(cachedData);
+    } catch (eCache) {
+      Logger.log('distance cache ignored: ' + eCache);
+    }
+  }
+
+  var usage = incrementMapsDistanceUsage_();
+
+  if (!usage.allowed) {
+    var limitMessage = 'Google Maps APIの1日上限に達しました。距離を手入力してください。';
+
+    logMapsDistanceIssue_('WARN', 'MAPS_DISTANCE_DAILY_LIMIT', limitMessage, {
+      origin: origin,
+      destination: destination,
+      usage: usage
+    });
+
+    notifyMapsDistanceIssue_('DAILY_LIMIT', limitMessage, {
+      origin: origin,
+      destination: destination,
+      usage: usage
+    });
+
+    return buildDistanceErrorResponse_('DAILY_LIMIT', limitMessage, {
+      usage: usage
+    });
+  }
+
+  try {
+    var result = fetchGoogleRouteDistance_(origin, destination);
+
+    var out = {
+      ok: true,
+      result: 'OK',
+      cached: false,
+      origin: origin,
+      destination: destination,
+      distance_meters: result.distance_meters,
+      distance_km: result.distance_km,
+      billing_distance_km: result.billing_distance_km,
+      duration_text: result.duration_text,
+      provider: result.provider,
+      usage: usage,
+      message: '距離を取得しました'
+    };
+
+    cache.put(cacheKey, JSON.stringify(out), getMapsDistanceCacheSeconds_());
+
+    return buildJsonResponse_(out);
+  } catch (e) {
+    var detailMessage = String(e && e.message ? e.message : e);
+    var errorCode = 'GOOGLE_MAPS_ERROR';
+
+    if (detailMessage.indexOf('GOOGLE_MAPS_API_KEY') !== -1) {
+      errorCode = 'API_KEY_MISSING';
+    } else if (
+      detailMessage.indexOf('HTTP 429') !== -1 ||
+      detailMessage.indexOf('RESOURCE_EXHAUSTED') !== -1
+    ) {
+      errorCode = 'GOOGLE_QUOTA_EXCEEDED';
+    }
+
+    Logger.log('MAPS_DISTANCE_ERROR: ' + detailMessage);
+
+    logMapsDistanceIssue_('ERROR', 'MAPS_DISTANCE_ERROR', detailMessage, {
+      origin: origin,
+      destination: destination,
+      usage: usage
+    });
+
+    notifyMapsDistanceIssue_(
+      errorCode,
+      '距離の自動取得に失敗しました。距離を手入力してください。',
+      {
+        usage: usage
+      }
+    );
+  }
+}
+
 function doGet(e) {
+  var __distanceParams = e && e.parameter ? e.parameter : {};
+  var __distanceType = String(__distanceParams.type || '').toLowerCase();
+
+  if (__distanceType === 'distance') {
+    return handleDistanceGet_(__distanceParams);
+  }
+
   var params = (e && e.parameter) ? e.parameter : {};
   var type = safeStr_(params.type, 50);
+
+  if (type === 'distance') {
+    return handleDistanceGet_(params);
+  }
 
   if (type === 'verify') {
     var receiptNo = safeStr_(params.receiptNo, 100);
@@ -1014,3 +1332,4 @@ function doGet(e) {
     spreadsheetId: getSpreadsheetId_()
   });
 }
+

@@ -36,8 +36,30 @@ function normalizePathname(pathname: string) {
   return `${pathname.replace(/\/+$/, '')}/`;
 }
 
+const APP_BASE_PATH = normalizePathname(import.meta.env.BASE_URL || '/');
+
+function stripAppBasePath(pathname: string) {
+  const normalized = normalizePathname(pathname);
+
+  if (APP_BASE_PATH !== '/' && normalized.startsWith(APP_BASE_PATH)) {
+    const stripped = normalized.slice(APP_BASE_PATH.length - 1);
+    return normalizePathname(stripped || '/');
+  }
+
+  return normalized;
+}
+
+function withAppBasePath(path: string) {
+  if (APP_BASE_PATH === '/') return path;
+
+  const base = APP_BASE_PATH.replace(/\/$/, '');
+  if (path === '/') return `${base}/`;
+
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
 function getViewFromLocation(locationLike: Pick<Location, 'pathname' | 'search'>): ViewState {
-  const pathname = normalizePathname(locationLike.pathname);
+  const pathname = stripAppBasePath(locationLike.pathname);
   const searchParams = new URLSearchParams(locationLike.search);
 
   if (pathname === '/simulator/') return 'simulator';
@@ -72,31 +94,46 @@ function getViewFromLocation(locationLike: Pick<Location, 'pathname' | 'search'>
 }
 
 function getUrlFromView(view: ViewState): string {
+  let path = '/';
+
   switch (view) {
     case 'simulator':
-      return '/simulator/';
+      path = '/simulator/';
+      break;
     case 'consult-delivery-estimate':
-      return '/request/';
+      path = '/request/';
+      break;
     case 'consult-delivery-order':
-      return '/request/?mode=order';
+      path = '/request/?mode=order';
+      break;
     case 'register':
-      return '/driver/';
+      path = '/driver/';
+      break;
     case 'pre-open':
-      return '/?page=pre-open';
+      path = '/?page=pre-open';
+      break;
     case 'vehicle':
-      return '/?page=vehicle';
+      path = '/?page=vehicle';
+      break;
     case 'terms':
-      return '/?page=terms';
+      path = '/?page=terms';
+      break;
     case 'privacy':
-      return '/?page=privacy';
+      path = '/?page=privacy';
+      break;
     case 'notice':
-      return '/?page=notice';
+      path = '/?page=notice';
+      break;
     case 'driver-notice':
-      return '/?page=driver-notice';
+      path = '/?page=driver-notice';
+      break;
     case 'top':
     default:
-      return '/';
+      path = '/';
+      break;
   }
+
+  return withAppBasePath(path);
 }
 
 function getTitleFromView(view: ViewState) {
